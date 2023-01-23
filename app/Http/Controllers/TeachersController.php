@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\Teachers;
 use App\Models\Subjects;
@@ -51,11 +52,27 @@ class TeachersController extends Controller
      */
     public function store(Request $request)
     {
+        if($request->teacher_id){
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'email' => 'required|max:100|email',
+                'teacher_sub_ids' => 'required'
+            ]);
+        }else{
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'email' => 'required|max:100|unique:teachers',
+                'teacher_sub_ids' => 'required'
+            ]);
+        }
+       
+        //Redirect back if validation fails
+        if($validator->fails()) {
+            return response()->json(['error_code'=>401,'error'=>$validator->errors()->all()]);
+        }
+
         Teachers::updateOrCreate([
-            'id' => $request->teacher_id,
-            'name' => $request->name, 
-            'email' => $request->email, 
-            'teacher_sub_ids' => implode(',', $request->teacher_sub_ids),
+            'id' => $request->teacher_id
         ],
         [
             'name' => $request->name, 

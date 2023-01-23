@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\Subjects;
 use DataTables;
@@ -48,11 +49,21 @@ class SubjectsController extends Controller
      */
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:50|unique:subjects',
+        ]);
+
+        //Redirect back if validation fails
+        if($validator->fails()) {
+            return response()->json(['error_code'=>401,'error'=>$validator->errors()->all()]);
+        }
+
         Subjects::updateOrCreate([
             'id' => $request->subject_id
         ],
         [
             'name' => $request->name, 
+            'status' => $request->status, 
         ]);        
      
         return response()->json(['success'=>'Subject saved successfully.']);

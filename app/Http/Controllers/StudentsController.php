@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\Students;
 use App\Models\Subjects;
@@ -50,10 +51,27 @@ class StudentsController extends Controller
      */
     public function store(Request $request)
     {
+        if($request->student_id){
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'email' => 'required|max:100|email',
+                'student_sub_ids' => 'required'
+            ]);
+        }else{
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'email' => 'required|max:100|unique:students',
+                'student_sub_ids' => 'required'
+            ]);
+        }
+       
+        //Redirect back if validation fails
+        if($validator->fails()) {
+            return response()->json(['error_code'=>401,'error'=>$validator->errors()->all()]);
+        }
+
         Students::updateOrCreate([
-            'id' => $request->student_id,
-            'email' => $request->email, 
-            'student_sub_ids' => implode(',', $request->student_sub_ids),
+            'id' => $request->student_id
         ],
         [
             'name' => $request->name, 

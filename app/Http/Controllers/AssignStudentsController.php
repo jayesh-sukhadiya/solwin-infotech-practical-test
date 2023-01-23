@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\Teachers;
 use App\Models\Subjects;
@@ -55,17 +56,33 @@ class AssignStudentsController extends Controller
      */
     public function store(Request $request)
     {
-        if(AssignStudentToTeacher::where('teacher_id',$request->teacher_ids)->doesntExist()){
+        if($request->assign_id){
+            $validator = Validator::make($request->all(), [
+                'teacher_id' => 'required',
+                'subject_id' => 'required',
+                'assign_stu_ids' => 'required',
+            ]);
+        }else{
+            $validator = Validator::make($request->all(), [
+                'teacher_id' => 'required|unique:assign_student_to_teachers',
+                'subject_id' => 'required',
+                'assign_stu_ids' => 'required',
+            ]);
+        }
+        
 
+        //Redirect back if validation fails
+        if($validator->fails()) {
+            return response()->json(['error_code'=>401,'error'=>$validator->errors()->all()]);
+        }
+
+        if(AssignStudentToTeacher::where('teacher_id',$request->teacher_id)->doesntExist()){
             AssignStudentToTeacher::updateOrCreate([
-                'id' => $request->assign_id,
-                'teacher_id' => $request->teacher_ids, 
-                'subject_id' => $request->subject_ids, 
-                'assign_stu_ids' => implode(',', $request->assign_stu_ids),
+                'id' => $request->assign_id
             ],
             [
-                'teacher_id' => $request->teacher_ids, 
-                'subject_id' => $request->subject_ids, 
+                'teacher_id' => $request->teacher_id, 
+                'subject_id' => $request->subject_id, 
                 'assign_stu_ids' => implode(',', $request->assign_stu_ids), 
             ]); 
 

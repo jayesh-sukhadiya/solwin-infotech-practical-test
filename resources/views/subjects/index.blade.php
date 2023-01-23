@@ -30,9 +30,19 @@
                 <form id="subjectForm" name="subjectForm" class="form-horizontal">
                    <input type="hidden" name="subject_id" id="subject_id">
                     <div class="form-group">
-                        <label for="name" class="col-sm-2 control-label">Name</label>
+                        <label for="name" class="col-sm-2 control-label">Name<span class="required-field">*</span></label>
                         <div class="col-sm-12">
                             <input type="text" class="form-control" id="name" name="name" placeholder="Enter Name" value="" maxlength="50" required="">
+                            <span id="nameRequired"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="name" class="col-sm-2 control-label">Status<span class="required-field">*</span></label>
+                        <div class="col-sm-12">
+                            <select class="form-control" id="status" name="status">
+                              <option value="1">Active</option>}
+                              <option value="0">Inactive</option>}
+                            </select>
                         </div>
                     </div>
         
@@ -90,7 +100,7 @@
           $('#ajaxModel').modal('show');
           $('#subject_id').val(data.id);
           $('#name').val(data.name);
-          $('#detail').val(data.detail);
+          $('#status').val(data.status);
       })
     });
 
@@ -106,11 +116,15 @@
           type: "POST",
           dataType: 'json',
           success: function (data) {
-       
-              $('#subjectForm').trigger("reset");
-              $('#ajaxModel').modal('hide');
-              table.draw();
-           
+              if(data.error_code == 401){
+               $('#nameRequired').html("<label class='text-danger'>"+ data.error+"</label>");
+              }else{
+                $('#subjectForm').trigger("reset");
+                $('#ajaxModel').modal('hide');
+                $('#nameRequired').html('');
+                alert(data.success);
+                table.draw();
+              }
           },
           error: function (data) {
               console.log('Error:', data);

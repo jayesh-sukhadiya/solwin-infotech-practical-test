@@ -4,7 +4,7 @@
 @endsection
 @section('content')
 <div class="container" style="margin-top: 20px;">
-    <h1>Assign Student to Teacher Record</h1>
+    <h1>Assign Student to Teacher</h1>
     <a class="btn btn-success" href="javascript:void(0)" id="createNewRecord" style="margin:10px 0px;">Assign Student</a>
     <a class="btn btn-success" href="{{ url('/') }}" id="createNewRecord" style="margin:10px 0px;float:right;">Back</a>
     <table class="table table-bordered data-table">
@@ -28,12 +28,13 @@
                 <h4 class="modal-title" id="modelHeading"></h4>
             </div>
             <div class="modal-body">
-                <form id="teacherForm" name="teacherForm" class="form-horizontal">
+              <span id="nameRequired"></span>
+                <form id="assignStudentForm" name="assignStudentForm" class="form-horizontal">
                    <input type="hidden" name="assign_id" id="assign_id">
                     <div class="form-group">
             			<label for="name" class="col-sm-6 control-label">Teacher<span class="required-field">*</span></label>
 			            <div class="col-sm-12">
-			              <select class="form-control" id="teacher_ids"  name="teacher_ids" required="">
+			              <select class="form-control" id="teacher_id"  name="teacher_id" required="">
 			                @foreach($teachers as $teacher)
 			                    <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
 			                @endforeach
@@ -44,7 +45,7 @@
 			        <div class="form-group">
 			            <label for="name" class="col-sm-6 control-label">Subject<span class="required-field">*</span></label>
 			            <div class="col-sm-12">
-			              <select class="form-control" id="subject_ids" name="subject_ids" required="">
+			              <select class="form-control" id="subject_id" name="subject_id" required="">
 			                @foreach($subjects as $subject)
 			                    <option value="{{ $subject->id }}">{{ $subject->name }}</option>
 			                @endforeach
@@ -103,7 +104,7 @@
     $('#createNewRecord').click(function () {
         $('#saveBtn').val("create-record");
         $('#assign_id').val('');
-        $('#teacherForm').trigger("reset");
+        $('#assignStudentForm').trigger("reset");
         $('#modelHeading').html("Create New Record");
         $('#ajaxModel').modal('show');
     });
@@ -117,8 +118,8 @@
           $('#saveBtn').val("edit-user");
           $('#ajaxModel').modal('show');
           $('#assign_id').val(data.id);
-          $('#teacher_ids').val(data.teacher_ids);
-          $('#subject_ids').val(data.subject_ids);
+          $('#teacher_id').val(data.teacher_id);
+          $('#subject_id').val(data.subject_id);
           $('#assign_stu_ids').val(data.assign_stu_ids);
       })
     });
@@ -130,16 +131,20 @@
         $(this).html('Sending..');
       
         $.ajax({
-          data: $('#teacherForm').serialize(),
+          data: $('#assignStudentForm').serialize(),
           url: "{{ route('assign-student-crud.store') }}",
           type: "POST",
           dataType: 'json',
           success: function (data) {
-       
-              $('#teacherForm').trigger("reset");
+            if(data.error_code == 401){
+               $('#nameRequired').html("<label class='text-danger'>"+ data.error+"</label>");
+            }else{
+              $('#assignStudentForm').trigger("reset");
               $('#ajaxModel').modal('hide');
+              $('#nameRequired').html("");
+              alert(data.success);
               table.draw();
-           
+            }
           },
           error: function (data) {
               console.log('Error:', data);

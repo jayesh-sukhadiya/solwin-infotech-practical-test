@@ -28,6 +28,7 @@
                 <h4 class="modal-title" id="modelHeading"></h4>
             </div>
             <div class="modal-body">
+              <span id="nameRequired"></span>
                 <form id="subjectForm" name="subjectForm" class="form-horizontal">
                    <input type="hidden" name="student_id" id="student_id">
                     <div class="form-group">
@@ -96,6 +97,7 @@
         $('#subjectForm').trigger("reset");
         $('#modelHeading').html("Create New Record");
         $('#ajaxModel').modal('show');
+        $('#nameRequired').html("");
     });
 
     /*--------------------- Click to Edit Button --------------*/ 
@@ -125,10 +127,15 @@
           type: "POST",
           dataType: 'json',
           success: function (data) {
-       
-              $('#subjectForm').trigger("reset");
-              $('#ajaxModel').modal('hide');
-              table.draw();
+              if(data.error_code == 401){
+               $('#nameRequired').html("<label class='text-danger'>"+ data.error+"</label>");
+              }else{
+                $('#subjectForm').trigger("reset");
+                $('#ajaxModel').modal('hide');
+                $('#nameRequired').html("");
+                alert(data.success);
+                table.draw();
+              }
            
           },
           error: function (data) {
