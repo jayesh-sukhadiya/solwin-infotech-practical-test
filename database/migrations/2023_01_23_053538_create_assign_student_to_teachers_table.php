@@ -15,6 +15,12 @@ class CreateAssignStudentToTeachersTable extends Migration
     {
         Schema::create('assign_student_to_teachers', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('teacher_id');
+            $table->foreign('teacher_id')->references('id')->on('teachers')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedBigInteger('subject_id');
+            $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('cascade')->onUpdate('cascade');
+            $table->text('assign_stu_ids');
+            $table->tinyInteger('status')->default(1)->comment('0 = No Active, 1 = Active');
             $table->timestamps();
         });
     }
